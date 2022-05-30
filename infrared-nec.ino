@@ -1,7 +1,7 @@
 #include <IRLibAll.h>
 
-IRsend sender;
-
+IRsendNEC sender;
+char buf[1024];
 void setup() {
   Serial.begin(115200);
 }
@@ -9,10 +9,12 @@ void setup() {
 void loop() {
   while (!Serial.available());
   String inputString = Serial.readString();
-  short bufferLength = inputString.length() + 1;
-  char buffer[bufferLength];
-  inputString.toCharArray(buffer, bufferLength);
-
-  unsigned long code = atol(buffer);
-  sender.send(NEC, code);
+  int bufferLength = inputString.length() + 1;
+  inputString.toCharArray(buf, bufferLength);
+  char *p = buf;
+  char *str;
+  while ((str = strtok_r(p, ";", &p)) != NULL) {
+    unsigned long code = atol(str);
+    sender.send(code);
+  }
 }
